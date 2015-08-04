@@ -6,3 +6,5 @@ gem 'iconv'
 
 gem 'book_toolkit'
 gem 'web_task_runner'
+
+gem 'imgur-api'

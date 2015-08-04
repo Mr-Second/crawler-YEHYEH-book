@@ -1,6 +1,7 @@
 require 'json'
 require 'crawler_rocks'
 require 'pry'
+require 'open-uri'
 
 require 'thread'
 require 'thwait'
@@ -8,6 +9,8 @@ require 'thwait'
 require 'book_toolkit'
 
 require 'iconv'
+
+require 'imgur'
 
 class YehyehBookCrawler
   include CrawlerRocks::DSL
@@ -19,6 +22,7 @@ class YehyehBookCrawler
     @index_url = "http://www.yehyeh.com.tw/books.aspx"
     @ic = Iconv.new("utf-8//translit//IGNORE","utf-8")
     # ?a=000247&pgenow=0&sysmainid=books&titleid=&edtitleid=?&mode=dblist&edpagenow=94
+    @client = Imgur.new(ENV['IMGUR_ID'])
   end
 
   def books
@@ -63,6 +67,12 @@ class YehyehBookCrawler
             isbn = nil
           end
 
+          filename = Digest::MD5.hexdigest(external_image_url)
+          File.write("tmp/#{filename}", open(external_image_url).read)
+
+          image = Imgur::LocalImage.new("tmp/#{filename}", title: filename)
+          uploaded = @client.upload(image)
+
           book = {
             name: name,
             url: url,
@@ -72,7 +82,7 @@ class YehyehBookCrawler
             author: author,
             internal_code: internal_code,
             original_price: original_price,
-            external_image_url: external_image_url,
+            external_image_url: uploaded.link,
             known_supplier: 'yehyeh'
           }
 
