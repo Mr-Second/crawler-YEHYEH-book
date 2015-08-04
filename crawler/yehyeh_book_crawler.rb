@@ -35,6 +35,7 @@ class YehyehBookCrawler
         @threads.count < (ENV['MAX_THREADS'] || 5)
       )
       @threads << Thread.new do
+
         r = RestClient.get(
           @index_url +
           "?a=000247&pgenow=0&sysmainid=books&titleid=&edtitleid=?&mode=dblist&edpagenow=#{i}"
@@ -79,9 +80,11 @@ class YehyehBookCrawler
 
           @books << book
         end
-        # print "#{i} / #{page_num}\n"
+        print "#{i} / #{page_num}\n"
       end # end thread
     end # end each page
+
+    ThreadsWait.all_waits(*@threads)
     @books
   end
 end

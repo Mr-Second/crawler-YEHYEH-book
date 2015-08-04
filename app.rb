@@ -12,9 +12,14 @@ class CrawlWorker < WebTaskRunner::TaskWorker
       after_each: proc do |payload|
         book = payload[:book]
         print "Saving book #{book[:isbn]} ...\n"
+  begin
         RestClient.put("#{ENV['DATA_MANAGEMENT_API_ENDPOINT']}/#{book[:isbn]}?key=#{ENV['DATA_MANAGEMENT_API_KEY']}",
           { ENV['DATA_NAME'] => book }
         )
+  rescue Exception => e
+    print "#{e.backtrace}\n"
+    print "#{e}\n"
+  end
         WebTaskRunner.job_1_progress = payload[:progress]
       end
     )
